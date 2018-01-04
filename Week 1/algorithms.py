@@ -121,38 +121,35 @@ def clumps_finding(text, k, t, L):
         for index, freq in enumerate(freq_array):
             if freq >= t:
                 clumps[index] = 1
-        for index, clump in enumerate(clumps):
-            if clump == 1:
-                pattern = number_to_pattern(index, k)
-                frequent_patterns.append(pattern)
+    for index, clump in enumerate(clumps):
+        if clump == 1:
+            pattern = number_to_pattern(index, k)
+            frequent_patterns.append(pattern)
     return frequent_patterns
 
-
-if __name__ == "__main__":
-    # pass
-    # # data = requests.get('http://bioinformaticsalgorithms.com/data/realdatasets/Replication/Vibrio_cholerae.txt')
-    # # text = data.text
-    # # pattern_count(text, 'GCGCGGCG')
-    # # frequent_words(text, 'GCGCGGCG')
-
-    data = requests.get('http://bioinformaticsalgorithms.com/data/realdatasets/Rearrangements/E_coli.txt')
-    find_clumps(data.text, 9, 500, 3)
-
-    # file_data = open( '/Users/arangooj/Downloads/dataset_4_5.txt')
-    # input = list(file_data)
-    # genome = input[0].replace('\n', '')
-    # params = input[1].replace('\n', '').split(' ')
-    # k = int(params[0])
-    # L = int(params[1])
-    # t = int(params[2])
-    # find_clumps(genome, k, L, t)
-
-    # data = requests.get('https://stepik.org/media/attachments/bioinformatics/FrequencyArray.txt')
-    # params = data.text.split('\r\n')
-    # text = params[1]
-    # k = int(params[2])
-    # expected_output = params[4]
-    # obtained_output = compute_freq(text, k)
-    # assert expected_output == obtained_output
-
-    # pattern_to_number(pattern, k) = 4 * pattern_to_number(pattern[:-1], k) + BASE_PATTERN.find(pattern[-1:])
+def better_clumps_finding(text, k, t, L):
+    """Same that clumps_finding but instead of calling the
+    compute_freq for each L is only done once. And updates 
+    with the first and last k-mer.
+    """
+    frequent_patterns = []
+    clumps = [0 for i in range(0, 4**k)]
+    first_subtext = text[:L] 
+    freq_array = compute_freq(first_subtext, k)
+    for index, freq in enumerate(freq_array):
+        if freq >= t:
+            clumps[index] = 1
+    for i in range(1, len(text) - L + 1):
+        old_kmer = text[i - 1:i - 1 + k]
+        old_kmer_number = pattern_to_number(old_kmer)
+        freq_array[old_kmer_number] -= 1
+        new_kmer = text[i + L:i + L + k]
+        new_kmer_number = pattern_to_number(new_kmer)
+        freq_array[new_kmer_number] += 1
+        if freq_array[new_kmer_number] >= t:
+            clumps[new_kmer_number] = 1
+    for index, clump in enumerate(clumps):
+        if clump == 1:
+            pattern = number_to_pattern(index, k)
+            frequent_patterns.append(pattern)  
+    return frequent_patterns
