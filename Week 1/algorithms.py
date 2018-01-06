@@ -1,4 +1,4 @@
-from convertions import *
+from utils.convertions import *
 import requests
 import numpy as np
 
@@ -8,6 +8,7 @@ def pattern_count(text, pattern):
     return len([i
                 for i in range(0, len(text) - len(pattern) + 1)
                 if text[i:i + len(pattern)] == pattern])
+
 
 def frequent_words(text, k):
     """Returns the patterns(k-mers) that are more frequent. """
@@ -23,6 +24,7 @@ def frequent_words(text, k):
             frequent_patterns.append(text[i:i+k])
     return frequent_patterns
 
+
 def frequent_words_t(text, k, t):
     """Returns the patterns(k-mers) whose frequency of
     occurrence (count) is greater than t.
@@ -36,10 +38,11 @@ def frequent_words_t(text, k, t):
             frequent_patterns.append(text[i:i+k])
     return frequent_patterns
 
+
 def find_position(pattern, text):
     """Returns and array with all positions where the pattern is
     found within the text.
-    """            
+    """
     positions = []
     i = 0
     while text[i:] and text[i:].find(pattern) != -1:
@@ -47,6 +50,7 @@ def find_position(pattern, text):
         positions.append(position)
         i = position + 1
     return positions
+
 
 def find_clumps(text, k, L, t):
     """ It slides a window L and it finds the most common
@@ -62,6 +66,7 @@ def find_clumps(text, k, L, t):
                 clumps.append(k_mer)
     return clumps
 
+
 def compute_freq(text, k):
     """A k-mer can be arranged in a 4^k ordered array. 
     This function returns an array of the frequency of each of the k-mers
@@ -76,6 +81,7 @@ def compute_freq(text, k):
     # return ' '.join([str(i) for i in freq_array])
     return freq_array
 
+
 def faster_frequent_words(text, k):
     """A better version to find frequent k-mers
     using the compute_freq function.
@@ -88,6 +94,7 @@ def faster_frequent_words(text, k):
             pattern = number_to_pattern(i, k)
             frequent_patterns.append(pattern)
     return frequent_patterns
+
 
 def frequent_words_by_sorting(text, k):
     """An alternative method of finding frequent words."""
@@ -109,6 +116,7 @@ def frequent_words_by_sorting(text, k):
             frequent_patterns.append(pattern)
     return frequent_patterns
 
+
 def clumps_finding(text, k, t, L):
     """Same that find_clumps but using the improved functions
     to find frequent patterns
@@ -126,6 +134,7 @@ def clumps_finding(text, k, t, L):
             pattern = number_to_pattern(index, k)
             frequent_patterns.append(pattern)
     return frequent_patterns
+
 
 def better_clumps_finding(text, k, t, L):
     """Same that clumps_finding but instead of calling the
