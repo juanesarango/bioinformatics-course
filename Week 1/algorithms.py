@@ -5,18 +5,18 @@ import numpy as np
 
 def pattern_count(text, pattern):
     """Counts the number of times a pattern is in text. """
-    return len([i 
-        for i in range(0, len(text)-len(pattern)+1) 
-        if text[i:i+len(pattern)]== pattern])
+    return len([i
+                for i in range(0, len(text) - len(pattern) + 1)
+                if text[i:i + len(pattern)] == pattern])
 
 def frequent_words(text, k):
-    """Returns the patterns(k-mers) that are more frequent. """    
+    """Returns the patterns(k-mers) that are more frequent. """
     frequent_patterns = []
-    count={}
+    count = {}
     for i in range(0, len(text)-k+1):
         pattern = text[i:i+k]
         count[i] = pattern_count(text, pattern)
-    max_count = max(count.values()) if len(count) else 0
+    max_count = max(count.values()) if count else 0
     for i in range(0, len(text)-k+1):
         pattern = text[i:i+k]
         if count[i] == max_count and pattern not in frequent_patterns:
@@ -26,9 +26,9 @@ def frequent_words(text, k):
 def frequent_words_t(text, k, t):
     """Returns the patterns(k-mers) whose frequency of
     occurrence (count) is greater than t.
-    """        
+    """
     frequent_patterns = []
-    count={}
+    count = {}
     for i in range(0, len(text)-k+1):
         pattern = text[i:i+k]
         count[i] = pattern_count(text, pattern)
@@ -129,12 +129,12 @@ def clumps_finding(text, k, t, L):
 
 def better_clumps_finding(text, k, t, L):
     """Same that clumps_finding but instead of calling the
-    compute_freq for each L is only done once. And updates 
+    compute_freq for each L is only done once. And updates
     with the first and last k-mer.
     """
     frequent_patterns = []
     clumps = [0 for i in range(0, 4**k)]
-    first_subtext = text[:L] 
+    first_subtext = text[:L]
     freq_array = compute_freq(first_subtext, k)
     for index, freq in enumerate(freq_array):
         if freq >= t:

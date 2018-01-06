@@ -63,7 +63,7 @@ def number_to_pattern(number, k):
     if k == 1:
         return number_to_symbol(number)
     prefix_number = int(number/4)
-    remainer = number - prefix_number
+    remainer = number - prefix_number * 4
     symbol = number_to_symbol(remainer)
     prefix_pattern = number_to_pattern(prefix_number, k - 1)
     return prefix_pattern + symbol

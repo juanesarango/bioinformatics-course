@@ -28,4 +28,3 @@ def first_week_exercises():
     # assert expected_output == obtained_output
 
     # pattern_to_number(pattern, k) = 4 * pattern_to_number(pattern[:-1], k) + BASE_PATTERN.find(pattern[-1:])
-
