@@ -9,6 +9,8 @@ To run it from bash:
 """
 
 import sys
+import pandas as pd
+
 
 BASE_PATTERN = 'ACGT'
 
@@ -157,11 +159,13 @@ def find_array_positions(num, array):
     return [index for index, item in enumerate(array) if item == num]
 
 
-genome, = sys.stdin.read().splitlines()
+# genome, = sys.stdin.read().splitlines()
+data = pd.read_csv('salmonella_enterica.txt', sep='\n', header=None)
+genome = ' '.join([i[0] for i in data.values.tolist()])
 k = 9
 d = 1
 skew_se = skew(genome)
 ori = find_array_positions(min(skew_se), skew_se)
-# output = frequent_kmers_complements(text, k, d)
+subgenome = genome[ori - 50:ori + 50]
+output = frequent_kmers_complements(subgenome, k, d)
 print(ori)
-# print(ls2str(output))
