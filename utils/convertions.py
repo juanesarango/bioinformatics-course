@@ -7,17 +7,21 @@ COMPLEMENT = {
     'T': 'A',
 }
 
+
 def get_complementary(text):
     """Get complementary nucleotide chain."""
     return ''.join(reversed([COMPLEMENT[n] for n in text]))
+
 
 def symbol_to_number(symbol):
     """Convert to nucleotides to weights ACGT -> 0123."""
     return BASE_PATTERN.find(symbol)
 
+
 def number_to_symbol(number):
     """Convert weights to nucleotides 0123 -> ACGT."""
     return BASE_PATTERN[number]
+
 
 # Normal Version
 def pattern_to_number_1(pattern):
@@ -29,6 +33,7 @@ def pattern_to_number_1(pattern):
         number += position_weigths[index] * BASE_PATTERN.find(letter)
     return number
 
+
 def number_to_pattern_1(number, pattern_length):
     """Having a 4^k array with every k-mer combination sorted lexicographically,
     the functions return the pattern given the position number in the array."""
@@ -39,6 +44,7 @@ def number_to_pattern_1(number, pattern_length):
         pattern += BASE_PATTERN[pattern_weight]
         number -= weight * pattern_weight
     return pattern
+
 
 # Recursive Version
 def pattern_to_number(pattern):
@@ -54,6 +60,7 @@ def pattern_to_number(pattern):
     prefix = pattern[:-1]
     return 4 * pattern_to_number(prefix) + symbol_to_number(symbol)
 
+
 def number_to_pattern(number, k):
     """Recursively the pattern can be calculated by taking dividing
     the number by the weight of that position. The remainer is used to
@@ -67,3 +74,9 @@ def number_to_pattern(number, k):
     symbol = number_to_symbol(remainer)
     prefix_pattern = number_to_pattern(prefix_number, k - 1)
     return prefix_pattern + symbol
+
+
+def complementary_number(number, k):
+    pattern = number_to_pattern(number, k)
+    pattern_c = get_complementary(pattern)
+    return pattern_to_number(pattern_c)

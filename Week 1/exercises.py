@@ -8,7 +8,8 @@ def first_week_exercises():
     # # frequent_words(text, 'GCGCGGCG')
 
     data = requests.get('http://bioinformaticsalgorithms.com/data/realdatasets/Rearrangements/E_coli.txt')
-    find_clumps(data.text, 9, 500, 3)
+    l = find_clumps(data.text[3923620:3924120], 9, 500, 3)
+    print(l)
 
     # file_data = open( '/Users/arangooj/Downloads/dataset_4_5.txt')
     # input = list(file_data)

@@ -1,5 +1,4 @@
 from algorithms import *
-
 import sys
 
 
@@ -23,7 +22,6 @@ def exercise_4():
     pattern, text = sys.stdin.read().splitlines()
 
     print(' '.join([str(i) for i in find_position(pattern, text)]))
-
 
 def exercise_5():
     text, params = sys.stdin.read().splitlines()
