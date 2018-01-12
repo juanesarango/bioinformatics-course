@@ -268,3 +268,56 @@ def frequent_kmers_complements(text, k, d):
     return [
         number_to_pattern(kmer_index, k)
         for kmer_index in find_array_positions(max(comp_sum), comp_sum)]
+
+
+def neighbors_1(pattern):
+    """Generates the d-neighborhood, the set of all k-mers whose Hamming
+    distance from Pattern does not exceed d. Version 1.0
+    """
+    neighborhood = []
+    for i in range(len(pattern)):
+        symbol = pattern[i]
+        for base in BASE_PATTERN:
+            neighbor = pattern[:i] + base + pattern[i+1:]
+            if base != symbol:
+                neighborhood.append(neighbor)
+    return neighborhood
+
+
+def neighbors_2(pattern):
+    """Generates the d-neighborhood, the set of all k-mers whose Hamming
+    distance from Pattern does not exceed d. Version 2.0
+    """
+    return [
+        pattern[:index] + base + pattern[index + 1:]
+        for index in range(len(pattern))
+        for base in BASE_PATTERN
+        if pattern[index] != base]
+
+
+def neighbors(pattern, d):
+    """Generates the d-neighborhood, the set of all k-mers whose Hamming
+    distance from Pattern does not exceed d. Version 3.0
+    """
+    if not pattern or not d:
+        return pattern
+    if len(pattern) == 1:
+        return list(BASE_PATTERN)
+    neighborhood = []
+    sufix_neighbors = neighbors(pattern[1:], d)
+    for neighbor in sufix_neighbors:
+        if hamming_distance(pattern[1:], neighbor) < d:
+            for base in BASE_PATTERN:
+                neighborhood.append(base + neighbor)
+        else:
+            neighborhood.append(pattern[0] + neighbor)
+    return neighborhood
+
+
+def odds_of_kmer_in_strings(k, L, N):
+    """Return the expected number of k-mers that can be found
+    in N strings of lenght L
+    """
+    odds_kmer = 1/(4**k)
+    kmer_in_string = L - k + 1
+    return odds_kmer * kmer_in_string * N
