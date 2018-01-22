@@ -4,7 +4,9 @@ import sys
 
 
 def exercise_test():
-    data = requests.get('http://bioinformaticsalgorithms.com/data/extradatasets/replication/minimum_skew.txt')
+    data = requests.get((
+        'http://bioinformaticsalgorithms.com/data/'
+        'extradatasets/replication/minimum_skew.txt'))
     args = data.text.split('\r\n')
     genome = args[1]
     expected_output = args[3]
