@@ -1,4 +1,5 @@
 import math
+import random
 import requests
 
 import numpy as np
@@ -525,3 +526,63 @@ def greedy_motif_search(dna_list, k):
             best_score = score
             best_motifs = motifs
     return best_motifs
+
+
+# Week 4
+def find_consensus(motifs):
+    """Returns the first string consensus from a given
+    list of motifs.
+    """
+    k = len(motifs[0])
+    base_len = len(BASE_PATTERN)
+    profile = create_profile(motifs)
+    profile = np.array([bij for _, bi in profile.items()
+                       for bij in bi]).reshape(base_len, k).T
+    return ''.join([BASE_PATTERN[np.argmax(array_in_position)]
+                    for array_in_position in profile])
+
+
+def get_score(motifs):
+    """Returns the sum distance from all strings away from
+    the consensus motif.
+    """
+    pattern = find_consensus(motifs)
+    return d_dna_list(pattern, motifs)
+
+
+def get_random_motifs(dna_list, k):
+    """This method takes a random k-mer from each of the DNA
+    strings of the list. It returns a list of random k-mers.
+    """
+    motifs = []
+    for dna_string in dna_list:
+        random_index = random.randint(0, len(dna_list[0]))
+        motifs.append(dna_string[random_index:random_index + k])
+    return motifs
+
+
+def get_motifs(profile, dna_list):
+    """Given a profile and a DNA list, it returns the most probable
+    k-mer for each string of the list.
+    """
+    k = len(profile['A'])
+    return [most_probable_kmer(dna_string, k, profile)
+            for dna_string in dna_list]
+
+
+def randomized_motif_search(dna_list, k):
+    """Given a list of DNA strings. It creates a profile with the results of the
+    previous iteration. The first set of k-mer motifs is random.
+    """
+    motifs = get_random_motifs(dna_list, k)
+    best_motifs = motifs
+    best_score = get_score(best_motifs)
+    while True:
+        profile = create_profile(motifs)
+        motifs = get_motifs(profile, dna_list)
+        score = get_score(motifs)
+        if score < best_score:
+            best_motifs = motifs
+            best_score = score
+        else:
+            return best_motifs

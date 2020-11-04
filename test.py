@@ -11,8 +11,66 @@ To run it from bash:
 import sys
 import math
 import numpy as np
+import random
 
 BASE_PATTERN = 'ACGT'
+
+
+def hamming_distance(text_p, text_q):
+    """Returns the hamming distance between 2 segments.
+    This distance is the total sum of mismatches for eachj position
+    `i` if `p[i] != q[i]`.
+    """
+    if len(text_p) != len(text_q):
+        return -1
+    return sum([text_p[i] != text_q[i] for i in range(len(text_p))])
+
+
+def d_dna_list(pattern, dna_list):
+    """Minimum hamming distance of the list of DNA strings."""
+    return sum([d_dna_string(pattern, dna_string)[0]
+                for dna_string in dna_list])
+
+
+def d_dna_string(pattern, dna_string):
+    """Minimum hamming distance of the pattern with a
+    k-mer found in the DNA string.
+    """
+    min_kmer = ''
+    min_distance = len(dna_string)
+    for i in range(len(dna_string) - len(pattern) + 1):
+        kmer = dna_string[i:i + len(pattern)]
+        distance = hamming_distance(kmer, pattern)
+        if distance < min_distance:
+            min_distance = distance
+            min_kmer = kmer
+    return min_distance, min_kmer
+
+
+def find_consensus(motifs):
+    """Returns the first string consensus from a given
+    list of motifs.
+    """
+    k = len(motifs[0])
+    base_len = len(BASE_PATTERN)
+    profile = create_profile(motifs)
+    # /print(profile)
+    profile = np.array([bij for _, bi in profile.items()
+                       for bij in bi]).reshape(base_len, k).T
+    return ''.join([BASE_PATTERN[np.argmax(array_in_position)]
+                    for array_in_position in profile])
+
+
+def get_score(motifs):
+    """Returns the sum distance from all strings away from
+    the consensus motif.
+    """
+    pattern = find_consensus(motifs)
+    # for motif in motifs:
+    #     print(f'{motif} Motif')
+    # print('--------------------')
+    # print(f'{pattern} Consensus')
+    return d_dna_list(pattern, motifs)
 
 
 def entropy_score(list_motifs):
@@ -91,38 +149,97 @@ def create_profile(motifs):
     of lenght k.
     """
     k = len(motifs[0])
-    profile = {base: [0] * k for base in BASE_PATTERN}
+    # Initialize in 1 to apply Laplace's rule of sucession to avoid 0's.
+    profile = {base: [1] * k for base in BASE_PATTERN}
     for index in range(k):
         for motif in motifs:
             profile[motif[index]][index] += 1
-    return {base: [value/(len(motifs) + 0) for value in items]
+    return {base: [value/(len(motifs) + len(BASE_PATTERN)) for value in items]
             for base, items in profile.items()}
 
 
-def greedy_motif_search(dna_list, k):
-    """Given a list of DNA strings. It creates a profile by updating the
-    matrix with each k-mer of the list. Then it finds the most probable
-    k-mer to find the best motifs.
+def get_random_motifs(dna_list, k):
+    """This method takes a random k-mer from each of the DNA
+    strings of the list. It returns a list of random k-mers.
     """
-    best_motifs = [dna_string[:k] for dna_string in dna_list]
-    first_dna = dna_list[0]
-    best_score = k * len(dna_list)
-    for i in range(len(first_dna) - k + 1):
-        motifs = [first_dna[i:i + k]]
-        for dna_string in dna_list[1:]:
-            profile = create_profile(motifs)
-            best_kmer = most_probable_kmer(dna_string, k, profile)
-            motifs.append(best_kmer)
-        score = entropy_score(motifs)
-        print(f'motifs -> {motifs[0]} score -> {score}')
-        if score < best_score:
-            best_score = score
-            best_motifs = motifs
-    return best_motifs
+    motifs = []
+    for dna_string in dna_list:
+        random_index = random.randint(0, len(dna_list[0]) - k)
+        motifs.append(dna_string[random_index:random_index + k])
+    return motifs
 
+
+def get_motifs(profile, dna_list):
+    """Given a profile and a DNA list, it returns the most probable
+    k-mer for each string of the list.
+    """
+    k = len(profile['A'])
+    return [most_probable_kmer(dna_string, k, profile)
+            for dna_string in dna_list]
+
+
+def randomized_motif_search_r(dna_list, k):
+    """Given a list of DNA strings. It creates a profile with the results of the
+    previous iteration. The first set of k-mer motifs is random.
+    """
+    motifs = get_random_motifs(dna_list, k)
+    best_motifs = motifs
+    best_score = get_score(best_motifs)
+    while True:
+        # print(f'Score0 {best_score}')
+        profile = create_profile(motifs)
+        motifs = get_motifs(profile, dna_list)
+        score = get_score(motifs)
+        # print(f'Score1 {score}')
+        if score < best_score:
+            best_motifs = motifs
+            best_score = score
+        else:
+            return best_motifs
+
+
+def randomized_motif_search(dna_list, k):
+    """Given a list of DNA strings. It creates a profile with the results of the
+    previous iteration. The first set of k-mer motifs is random.
+    """
+    motifs = []
+    for dna_string in dna_list:
+        random_index = random.randint(0, len(dna_list[0]) - k)
+        motifs.append(dna_string[random_index:random_index + k])
+    best_motifs = motifs
+    best_score = get_score(best_motifs)
+    n = 0
+    while True:
+        n += 1
+        # print(f'Score0 {best_score} {n}')
+        profile = create_profile(motifs)
+        motifs = get_motifs(profile, dna_list)
+        score = get_score(motifs)
+        # print(f'Score1 {score}')
+        if score < best_score:
+            best_motifs = motifs
+            best_score = score
+        else:
+            # print(f'Iterations {n}')
+            return best_motifs
+
+
+def run_n_times(n, dna_list, k):
+    best_motifs = []
+    best_score = 100
+    for i in range(n):
+        motifs = randomized_motif_search(dna_list, k)
+        score = get_score(motifs)
+        # print(f'{motifs} -> {score}')
+        if score <= best_score:
+            best_motifs = motifs
+            best_score = score
+    return best_motifs
 
 k_t, *dna_list = sys.stdin.read().splitlines()
 k = int(k_t.split(' ')[0])
-output = greedy_motif_search(dna_list, k)
+
+output = run_n_times(1000, dna_list, k)
 for o in output:
     print(o)
+print(f'{entropy_score(output)}')
